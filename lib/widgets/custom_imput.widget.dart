@@ -6,12 +6,14 @@ class CustomTextField extends StatelessWidget {
   final bool oscureText;
   final TextEditingController textController;
   final TextInputType keyboardType;
+  final bool enabled;
   const CustomTextField({
     @required this.hintText,
     @required this.icon,
     @required this.textController,
     this.oscureText = false,
     this.keyboardType = TextInputType.text,
+    this.enabled = true,
   });
 
   @override
@@ -25,6 +27,7 @@ class CustomTextField extends StatelessWidget {
               color: Colors.grey[300], blurRadius: 10, offset: Offset(0, 5)),
         ]),
         child: TextField(
+          enabled: enabled,
           controller: textController,
           autocorrect: false,
           keyboardType: keyboardType,
@@ -36,7 +39,7 @@ class CustomTextField extends StatelessWidget {
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(50),
             ),
-            fillColor: Colors.white,
+            fillColor: enabled ? Colors.white : Colors.grey[300],
             prefixIcon: Icon(
               icon,
               color: Colors.grey[500],

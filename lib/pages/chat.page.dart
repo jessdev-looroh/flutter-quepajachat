@@ -53,7 +53,24 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         child: Column(
           children: [
             Flexible(
-              child: _listviewMensajes(),
+              child: Stack(
+                children: [
+                  Container(
+                    child: Image.asset(
+                      "assets/fondo2.jpg",
+                      fit: BoxFit.fill,
+                    ),
+                    height: double.infinity,
+                    width: double.infinity,
+                  ),
+                  Container(
+                    height: double.infinity,
+                    width: double.infinity,
+                    color: Colors.grey[800].withOpacity(0.8),
+                  ),
+                  _listviewMensajes(),
+                ],
+              ),
             ),
             Divider(height: 1),
             //TODO: caja de texto
@@ -73,6 +90,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       itemCount: _mensajes.length,
       itemBuilder: (_, index) => _mensajes[index],
       reverse: true,
+      padding: EdgeInsets.only(bottom: 10, top: 10),
     );
   }
 

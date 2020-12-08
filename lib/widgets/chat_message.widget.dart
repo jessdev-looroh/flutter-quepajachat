@@ -17,6 +17,8 @@ class ChateMessage extends StatelessWidget {
     return FadeTransition(
       opacity: animationController,
       child: SizeTransition(
+        axis: Axis.vertical,
+        axisAlignment: -5,
         sizeFactor:
             CurvedAnimation(parent: animationController, curve: Curves.easeOut),
         child: Container(

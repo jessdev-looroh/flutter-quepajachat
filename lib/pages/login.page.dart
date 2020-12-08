@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:que_paja/helpers/alerta.dart';
+import 'package:que_paja/services/auth.service.dart';
 import 'package:que_paja/widgets/custom_boton.widget.dart';
 import 'package:que_paja/widgets/custom_imput.widget.dart';
 import 'package:que_paja/widgets/labels_login.widget.dart';
@@ -49,29 +52,46 @@ class __FormContainerState extends State<_FormContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final authServce = Provider.of<AuthService>(context);
     return Container(
       child: Column(
         children: [
           CustomTextField(
+            enabled: !authServce.isLogeando,
             keyboardType: TextInputType.emailAddress,
             hintText: "Correo",
             icon: Icons.email_outlined,
             textController: emailCtrl,
           ),
           CustomTextField(
+            enabled: !authServce.isLogeando,
             textController: passCtrl,
             hintText: "Contraseña",
             icon: Icons.lock_outline,
             oscureText: true,
           ),
           SizedBox(height: 20),
-          CustomBoton(onPressed: null, text: "Ingresar"),
+          CustomBoton(
+            onPressed: authServce.isLogeando ? null : login,
+            text: "Ingresar",
+          ),
         ],
       ),
     );
   }
 
-  login() {
-    print("Print login");
+  login() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    authService.isLogeando = true;
+    FocusScope.of(context).unfocus();
+    final loginOk = await authService.login(emailCtrl.text, passCtrl.text);
+    authService.isLogeando = false;
+
+    if (loginOk) {
+      Navigator.pushReplacementNamed(context, "usuarios");
+    } else {
+      mostrarAlerta(
+          context, "Login incorrecto", "Rebice sus credenciales nuevamente.");
+    }
   }
 }

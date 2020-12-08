@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:que_paja/models/usuario.model.dart';
+import 'package:que_paja/services/auth.service.dart';
 
 class UsuariosPage extends StatefulWidget {
   @override
@@ -22,15 +24,24 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Colors.white,
         title: Text(
-          "Mi nombre",
+          user.nombre,
+          style: TextStyle(color: Colors.black),
         ),
         leading: IconButton(
+          color: Colors.red[200],
           icon: Icon(Icons.exit_to_app),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, "login");
+            AuthService.deleteToken();
+          },
         ),
         actions: [
           Container(
