@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:que_paja/models/usuario.model.dart';
+import 'package:que_paja/models/usuario_response.model.dart';
 import 'package:que_paja/services/auth.service.dart';
+import 'package:que_paja/services/chat_service.dart';
+import 'package:que_paja/services/socket.service.dart';
+import 'package:que_paja/services/usuario.service.dart';
 
 class UsuariosPage extends StatefulWidget {
   @override
@@ -12,21 +16,21 @@ class UsuariosPage extends StatefulWidget {
 class _UsuariosPageState extends State<UsuariosPage> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  UsuarioService usuarioService = UsuarioService();
+  List<Usuario> usuarios = [];
 
-  final List<Usuario> usuarios = [
-    Usuario(nombre: "Jess", email: "jessdev@gmail.com", online: true, uid: "1"),
-    Usuario(nombre: "cris", email: "crisdev@gmail.com", online: true, uid: "2"),
-    Usuario(
-        nombre: "bray", email: "braydev@gmail.com", online: false, uid: "3"),
-    Usuario(nombre: "lele", email: "leledev@gmail.com", online: true, uid: "4"),
-    Usuario(nombre: "nat", email: "natdev@gmail.com", online: false, uid: "5"),
-  ];
+  @override
+  void initState() {
+    _cargaUsuarios();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-    final user = authService.usuario;
+    final socketService = Provider.of<SocketService>(context);
 
+    final user = authService.usuario;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -39,17 +43,17 @@ class _UsuariosPageState extends State<UsuariosPage> {
           color: Colors.red[200],
           icon: Icon(Icons.exit_to_app),
           onPressed: () {
-            Navigator.pushReplacementNamed(context, "login");
+            socketService.disconnect();
             AuthService.deleteToken();
+            Navigator.pushReplacementNamed(context, "login");
           },
         ),
         actions: [
           Container(
             margin: EdgeInsets.only(right: 10),
-            child: Icon(
-              Icons.check_circle,
-              color: Colors.greenAccent[400],
-            ),
+            child: socketService.serverStatus == ServerStatus.Online
+                ? Icon(Icons.check_circle, color: Colors.greenAccent[400])
+                : Icon(Icons.offline_bolt, color: Colors.red[400]),
           )
         ],
       ),
@@ -125,10 +129,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   void _onRefresh() async {
     // monitor network fetch
-    print("Refresh");
-    await Future.delayed(Duration(milliseconds: 1000));
+    _cargaUsuarios();
+
     // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
+
     // _refreshController.refreshFailed();
   }
 
@@ -148,6 +152,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   ListTile _usuarioListTile(Usuario user) {
     return ListTile(
+      onTap: () => goToChat(user),
       leading: CircleAvatar(
         backgroundColor: Colors.blue[200],
         foregroundColor: Colors.white,
@@ -164,5 +169,17 @@ class _UsuariosPageState extends State<UsuariosPage> {
       title: Text(user.nombre),
       subtitle: Text(user.email),
     );
+  }
+
+  _cargaUsuarios() async {
+    this.usuarios = await usuarioService.getUsuarios();
+    setState(() {});
+    _refreshController.refreshCompleted();
+  }
+
+  goToChat(Usuario user) {
+    final chatService = Provider.of<ChatService>(context, listen: false);
+    chatService.usuarioPara = user;
+    Navigator.pushNamed(context, 'chat');
   }
 }

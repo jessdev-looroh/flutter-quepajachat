@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:que_paja/helpers/alerta.dart';
 import 'package:que_paja/services/auth.service.dart';
+import 'package:que_paja/services/socket.service.dart';
 import 'package:que_paja/widgets/custom_boton.widget.dart';
 import 'package:que_paja/widgets/custom_imput.widget.dart';
 import 'package:que_paja/widgets/labels_login.widget.dart';
@@ -90,12 +91,14 @@ class __FormContainerState extends State<_FormContainer> {
 
   registrar() async {
     final authServie = Provider.of<AuthService>(context, listen: false);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     authServie.isLogeando = true;
     final regok = await authServie.registrar(
         email: emailCtrl.text, password: passCtrl.text, nombre: nameCtrl.text);
 
     authServie.isLogeando = false;
     if (regok) {
+      socketService.connect();
       Navigator.pushReplacementNamed(context, "usuarios");
     } else {
       mostrarAlerta(context, "Error al registrar", "Verifique sus datos");

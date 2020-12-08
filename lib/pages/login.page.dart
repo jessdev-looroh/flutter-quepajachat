@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:que_paja/helpers/alerta.dart';
 import 'package:que_paja/services/auth.service.dart';
+import 'package:que_paja/services/socket.service.dart';
 import 'package:que_paja/widgets/custom_boton.widget.dart';
 import 'package:que_paja/widgets/custom_imput.widget.dart';
 import 'package:que_paja/widgets/labels_login.widget.dart';
@@ -82,12 +83,15 @@ class __FormContainerState extends State<_FormContainer> {
 
   login() async {
     final authService = Provider.of<AuthService>(context, listen: false);
+    final socketService = Provider.of<SocketService>(context, listen: false);
+
     authService.isLogeando = true;
     FocusScope.of(context).unfocus();
     final loginOk = await authService.login(emailCtrl.text, passCtrl.text);
     authService.isLogeando = false;
 
     if (loginOk) {
+      socketService.connect();
       Navigator.pushReplacementNamed(context, "usuarios");
     } else {
       mostrarAlerta(
